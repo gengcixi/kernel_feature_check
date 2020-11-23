@@ -8,6 +8,7 @@
 
 feature_file=$1
 cur_pid=$$
+return_val=0
 echo_info()
 {
 	echo -e "\033[36m$*\033[0m"
@@ -78,12 +79,55 @@ check_config()
 	check_enabled_config
 	check_disabled_config
 }
+
 check_properties()
 {
 	if grep $2 $1;then
 		echo_pass "$2 in $1"
 	else
 		echo_error "$2 in $1"
+		let return_val++
+	fi
+}
+
+check_string()
+{
+	str_list=$(jq -r '.string[]?' $2)
+	local str_flag=0
+	file_str=$(cat $1)
+	for str in $str_list
+	do
+		if grep $str $1;then
+			let str_flag++
+		fi
+	done
+	if [ $str_flag -gt 0 ];then
+		echo_pass "$str in <<<$(echo $str_list)>>>"
+	else
+		echo_error "$str in <<<$(echo $str_list)>>>"
+		let return_val++
+	fi
+}
+
+check_value()
+{
+	file_value=$(cat $1)
+	if [ "$file_value" == "$2" ];then
+		echo_pass "$file_value in $file is $2"
+	else
+		echo_error "$file_value in $file isn't $2"
+		let return_val++
+	fi
+
+}
+
+check_interval()
+{
+	file_value=$(cat $1)
+	if [ $file_value -gt $2 -a $file_value -lt $3 ]; then
+		echo_pass "$file_value in $1 is between $2 and $3"
+	else
+		echo_error "$file_value in $1 isn't between $2 and $3"
 		let return_val++
 	fi
 }
@@ -100,6 +144,22 @@ check_attribute()
 				check_properties $file $prop
 			done
 		fi
+		string_list=$(jq -r '.string[]?' $1)
+		if [ -n "$string_list" ];then
+			check_string $file $1
+		fi
+		value=$(jq -r '.value?' $1)
+		if [ "$value" != "null" ];then
+			echo_info "start check value"
+			check_value $file $value
+		fi
+		interval_list=$(jq -r '.interval[]?' $1)
+		if [ -n "$interval_list" ];then
+			echo_info "start check interval"
+			max_value=$(jq -r '.interval[0]' $1)
+			min_value=$(jq -r '.interval[1]' $1)
+			check_interval $file $max_value $min_value
+		fi
 	else
 		echo_error "$file"
 		let return_val++
@@ -109,6 +169,7 @@ check_attribute()
 check_attribute_properties()
 {
 	attribute_length=$(jq -r '.attribute| length' $feature_file)
+
 	if [ -n $attribute_length ];then
 		echo_info "<<<starting check attribute properties>>>"
 		for i in $(seq 1 ${attribute_length})
