@@ -8,7 +8,15 @@
 
 echo_info()
 {
-	echo -e "\033[32m$*\033[0m"
+	echo -e "\033[36m$*\033[0m"
+}
+echo_pass()
+{
+	echo -e "\033[33m ${FUNCNAME[1]} CHECK PASS: $*\033[0m"
+}
+echo_error()
+{
+	echo -e "\033[31m ${FUNCNAME[1]} CHECK FAIL: $*\033[0m"
 }
 feature_file=$1
 check_jq()
@@ -32,9 +40,10 @@ check_enabled_config()
 	do
 		zcat /proc/config.gz |grep "${config}=" >/dev/null 2>&1
 		if [ $? -ne 0 ];then
+			echo_error "$config"
 			let return_val++
 		else
-			echo "CHECK_SET_OK:    $config"
+			echo_pass "$config"
 		fi
 	done
 	echo_info "<<<finished check needs enabled config>>>"
@@ -50,9 +59,10 @@ check_disabled_config()
 	do
 		zcat /proc/config.gz |grep "${config}=" >/dev/null 2>&1
 		if [ $? -eq 0 ];then
+			echo_error "$config"
 			let return_val++
 		else
-			echo "CHECK_NOSET_OK:    $config"
+			echo_pass "$config"
 		fi
 	done
 	echo_info "<<<finished check needs disabled config>>>"
