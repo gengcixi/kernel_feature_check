@@ -6,6 +6,8 @@
 #########################################################################
 #!/bin/sh
 
+feature_file=$1
+cur_pid=$$
 echo_info()
 {
 	echo -e "\033[36m$*\033[0m"
@@ -18,7 +20,6 @@ echo_error()
 {
 	echo -e "\033[31m ${FUNCNAME[1]} CHECK FAIL: $*\033[0m"
 }
-feature_file=$1
 check_jq()
 {
 	command -v jq >/dev/null 2>&1
@@ -112,13 +113,17 @@ check_attribute_properties()
 		echo_info "<<<starting check attribute properties>>>"
 		for i in $(seq 1 ${attribute_length})
 		do
-			attri_file=$(mktemp)
+			attri_file="/tmp/${cur_pid}-${feature_file%.*}.attri"
+			touch $attri_file
 			jq -r '.attribute['$i'-1]?' $feature_file>$attri_file
 			check_attribute $attri_file
 		done
+		rm $attri_file
 		echo_info "<<<finished check attribute properties>>>"
 	fi
 }
 check_config
 check_attribute_properties
-echo $return_val
+if [ $return_val -gt 0 ];then
+	echo_error "Total test has $return_val item failed"
+fi
