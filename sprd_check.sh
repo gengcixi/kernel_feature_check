@@ -6,9 +6,6 @@
 #########################################################################
 #!/bin/sh
 
-trap "" SIGTTIN
-trap "" SIGTTOU
-
 feature_file=$1
 cur_pid=$$
 return_val=0
