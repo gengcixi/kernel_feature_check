@@ -88,6 +88,7 @@ def check_string(file,string):
         else:
             fail_count+=1
             print_fail(file + " configureation is none of follow:")
+            print("\t",end="")
             print(string)
 
 
