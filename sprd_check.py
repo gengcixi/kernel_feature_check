@@ -9,6 +9,12 @@ import getopt
 
 fail_count=0
 
+def print_pass(str):
+    print("\033[1;33mCHECK PASS:\033[0m %s" %str)
+
+def print_fail(str):
+    print("\033[1;31mCHECK FAIL:\033[0m %s" %str)
+
 def interate_list(list):
     for element in list:
         print("\t"+element)
@@ -26,10 +32,10 @@ def check_enabled_config(list_config):
                 else:
                     test_flag=False
             if test_flag == True:
-                print("CHECK PASS: %s is enabled" %config)
+                print_pass(config + "is enabled")
             else:
                 fail_count+=1
-                print("CHECK FAIL: %s is not enabled" %config)
+                print_fail(config + "is not enabled")
 
 def check_disabled_config(list_config):
     global fail_count
@@ -45,9 +51,9 @@ def check_disabled_config(list_config):
                     test_flag=False
             if test_flag == True:
                 fail_count+=1
-                print("CHECK FAIL: %s is enabled" %config)
+                print_fail(config + "is enabled")
             else:
-                print("CHECK PASS: %s is not enabled" %config)
+                print_pass(config + "is not enabled")
 
 def check_properties(file,properties):
     global fail_count
@@ -61,10 +67,10 @@ def check_properties(file,properties):
                 else:
                     findflag=False
             if findflag == True:
-                print("CHECK PASS: %s have properties of " %file +prop)
+                print_pass(file + " have properites of " + prop)
                 print("\t"+line)
             else:
-                print("CHECK FAIL: %s not properties of " %file +prop)
+                print_fail(file + " no properites of " + prop)
                 fail_count+=1
 
 def check_string(file,string):
@@ -77,11 +83,11 @@ def check_string(file,string):
                     findflag+=1
                     break
         if findflag > 0:
-            print("CHECK PASS: %s configuration is contain %s" %(file,str))
+            print_pass(file + " configureation is contain  " + str)
             print("\t"+line)
         else:
             fail_count+=1
-            print("CHECK FAIL: %s configuration is none of follow:"%file)
+            print_fail(file + " configureation is none of follow:")
             print(string)
 
 
@@ -90,29 +96,31 @@ def check_value(file,value):
     with open(file,'r') as fd:
         fd_value=fd.read().strip("\n")
         if str(value) == str(fd_value):
-            print("CHECK PASS: %s value set is %s" %(file,value))
+            print_pass(file + " value set is " + value)
         else:
             fail_count+=1
-            print("CHECK FAIL: %s value set is not %s" %(file,value))
+            print_fail(file + " value set is not " + value)
 
 def check_interval(file,interval):
     global fail_count
     with open(file,'r') as fd:
         fd_value=int(fd.read())
         if fd_value >= int(min(interval)) and fd_value <= int(max(interval)):
-            print("CHECK PASS: %s value %d is between:" %(file,fd_value))
+            print_pass(file + " value " + str(fd_value) + " is between:")
             print("\t",end="")
             print(interval)
         else:
             fail_count+=1
-            print("CHECK PASS: %s value %d is out range:" %(file,fd_value))
+            print_fail(file + " value " + str(fd_value) + " is out of range:")
+            print("\t",end="")
+            print(interval)
 
 def get_each_attri(attri):
     global fail_count
     if 'file' in attri.keys():
         file_nm=attri.get('file')
         if os.path.exists(file_nm):
-            print("CHECK PASS: exist "+file_nm)
+            print_pass( "exist "+ file_nm)
             if 'properties' in attri.keys():
                 list_properties=attri.get('properties')
                 check_properties(file_nm,list_properties)
@@ -130,7 +138,7 @@ def get_each_attri(attri):
                 check_interval(file_nm,list_interval)
         else:
             fail_count+=1
-            print("CHECK FAIL: noexist "+file_nm)
+            print_fail( " not exist "+ file_nm)
 
 
 
