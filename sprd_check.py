@@ -102,19 +102,19 @@ def check_value(file,value):
             fail_count+=1
             print_fail(file + " value set is not " + value)
 
-def check_interval(file,interval):
+def check_range(file,range):
     global fail_count
     with open(file,'r') as fd:
         fd_value=int(fd.read())
-        if fd_value >= int(min(interval)) and fd_value <= int(max(interval)):
+        if fd_value >= int(min(range)) and fd_value <= int(max(range)):
             print_pass(file + " value " + str(fd_value) + " is between:")
             print("\t",end="")
-            print(interval)
+            print(range)
         else:
             fail_count+=1
             print_fail(file + " value " + str(fd_value) + " is out of range:")
             print("\t",end="")
-            print(interval)
+            print(range)
 
 def get_each_attri(attri):
     global fail_count
@@ -134,9 +134,9 @@ def get_each_attri(attri):
                 value=attri.get('value')
                 check_value(file_nm,value)
 
-            if 'interval' in attri.keys():
-                list_interval=attri.get('interval')
-                check_interval(file_nm,list_interval)
+            if 'range' in attri.keys():
+                list_range=attri.get('range')
+                check_range(file_nm,list_range)
         else:
             fail_count+=1
             print_fail( " not exist "+ file_nm)

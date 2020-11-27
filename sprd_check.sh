@@ -121,7 +121,7 @@ check_value()
 
 }
 
-check_interval()
+check_range()
 {
 	file_value=$(cat $1)
 	if [ $file_value -gt $2 -a $file_value -lt $3 ]; then
@@ -153,12 +153,12 @@ check_attribute()
 			echo_info "start check value"
 			check_value $file $value
 		fi
-		interval_list=$(jq -r '.interval[]?' $1)
-		if [ -n "$interval_list" ];then
-			echo_info "start check interval"
-			max_value=$(jq -r '.interval[0]' $1)
-			min_value=$(jq -r '.interval[1]' $1)
-			check_interval $file $max_value $min_value
+		range_list=$(jq -r '.range[]?' $1)
+		if [ -n "$range_list" ];then
+			echo_info "start check range"
+			max_value=$(jq -r '.range[0]' $1)
+			min_value=$(jq -r '.range[1]' $1)
+			check_range $file $max_value $min_value
 		fi
 	else
 		echo_error "$file"
